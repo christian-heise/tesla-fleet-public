@@ -1,0 +1,15 @@
+# Cloudflare Pages response headers.
+#
+# The Tesla Fleet API fetches the key at a fixed path to learn the public half of
+# this application's signing key. There is no build step here, so without this
+# rule the .pem extension is content-type guessed.
+/.well-known/appspecific/com.tesla.3p.public-key.pem
+  Content-Type: application/x-pem-file
+  Cache-Control: public, max-age=300
+
+# The callback renders a short-lived credential from the query string. Never
+# cache it, and keep it out of any embedding context.
+/oauth/callback
+  Cache-Control: no-store
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer

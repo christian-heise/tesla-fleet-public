@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /
+
+# Nothing here is for readers. The key must stay fetchable by Tesla, which does
+# not consult robots.txt, and this file does not restrict it.
