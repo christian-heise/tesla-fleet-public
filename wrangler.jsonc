@@ -1,0 +1,21 @@
+{
+  // Static-asset Worker: two public files for a private Tesla Fleet API
+  // integration. There is no Worker script -- `assets` alone serves the
+  // directory, and `_headers` supplies the per-path response headers.
+  //
+  // Deploy with `npx wrangler deploy` from this directory. Nothing deploys on
+  // push: this is an upload, not a Git-connected project.
+  "name": "tesla-fleet-public",
+  "compatibility_date": "2026-09-10",
+  "assets": {
+    "directory": "./public"
+  },
+  // Declared so a deploy re-asserts the custom domain rather than risking the
+  // hostname Tesla fetches the signing key from.
+  "routes": [
+    {
+      "pattern": "tesla.appsbychristian.com",
+      "custom_domain": true
+    }
+  ]
+}

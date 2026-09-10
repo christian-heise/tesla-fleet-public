@@ -1,6 +1,7 @@
 # tesla-fleet-public
 
-Two static files on `tesla.appsbychristian.com`, served by Cloudflare Pages.
+Two static files on `tesla.appsbychristian.com`, served by a Cloudflare Worker
+with static assets. Everything published lives in `public/`.
 
 The Tesla Fleet API will only register a developer application whose **public**
 signing key it can fetch over HTTPS at a fixed path on the application's own
@@ -26,14 +27,27 @@ domain. That is the only reason this host exists.
 
 ## Deployment
 
-Cloudflare Pages, connected to this repository. No build command, no build
-output directory — the repository root *is* the site. A push to `main` deploys.
-`_headers` pins the key's content type, since with no build step nothing else
-infers it from the extension.
+**Nothing deploys on push.** This is a Worker upload, not a Git-connected Pages
+project, so a commit on `main` changes nothing until someone runs:
+
+```sh
+npx wrangler deploy
+```
+
+`wrangler.jsonc` holds the whole configuration: the Worker name, the assets
+directory, and the custom domain declared as a route so that a deploy re-asserts
+the hostname rather than risking the one Tesla fetches the key from. There is no
+Worker script and no build step — `public/` is served as-is, and `_headers` pins
+the key's content type, since nothing else infers it from the extension.
+
+**Only `public/` is published.** The repository root is deliberately *not* the
+assets directory: an earlier upload of the root put the entire `.git` directory
+on the public site. Anything that must not be served simply stays outside
+`public/`.
 
 Custom domain: `tesla.appsbychristian.com`. It is a separate hostname from the
-portfolio site on purpose — one Pages project serves one site on every domain
-attached to it, so putting this on the portfolio's project would serve the whole
+portfolio site on purpose — one project serves one site on every domain attached
+to it, so putting this on the portfolio's project would serve the whole
 portfolio here too.
 
 ## Verifying a deploy
@@ -48,9 +62,9 @@ curl -fsS https://tesla.appsbychristian.com/.well-known/appspecific/com.tesla.3p
 # expect: eebecf4b4c12bda1384a001b6169dac2204a0af05784f3e87a59b47fb639ed0e
 ```
 
-If that path 404s while `/` works, Pages dropped the dot-directory from the
-build output; the fallback is a Cloudflare Worker on a route for that exact
-path, returning the PEM inline.
+If that path 404s while `/` works, the dot-directory was dropped from the
+uploaded assets; check that `public/.well-known/` is present in what
+`wrangler deploy` reports reading.
 
 Operational context, and the runbook that consumes this key, are in the private
 `tesla-logger` repository (`docs/setup/tesla.md`).
